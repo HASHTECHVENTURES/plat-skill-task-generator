@@ -13,12 +13,5 @@
       "dest": "/index.html"
     }
   ],
-  "outputDirectory": ".",
-  "functions": {},
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
-  ]
+  "outputDirectory": "."
 }
