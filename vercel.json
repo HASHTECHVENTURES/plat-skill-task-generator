@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "name": "plat-skill-task-generator",
+  "name": "plat-skill-ai-generator-v2",
   "builds": [
     {
       "src": "index.html",
