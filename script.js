@@ -1,6 +1,4 @@
-// PLAT SKILL Employability Task Generator - Gemini Only
-// Clean version with custom prompts only
-
+// PLAT SKILL Employability Task Generator
 // Configuration
 const CONFIG = {
     // Gemini API Configuration
@@ -83,14 +81,13 @@ const DOM = {
         this.selectAllCheckbox = document.getElementById('selectAllTasks');
         this.selectionCounter = document.getElementById('selectionCounter');
         
-        // API Configuration elements
-        this.geminiApiKeyInput = document.getElementById('gemini-api-key');
-        this.geminiModelSelect = document.getElementById('gemini-model');
-        this.testGeminiApiBtn = document.getElementById('test-gemini-api');
-        this.saveGeminiConfigBtn = document.getElementById('save-gemini-config');
-        this.resetGeminiConfigBtn = document.getElementById('reset-gemini-config');
+        // API Configuration elements (updated to match ChatGPT version)
+        this.apiKeyInput = document.getElementById('api-key');
+        this.modelSelect = document.getElementById('model-select');
+        this.testApiKeyBtn = document.getElementById('test-api-key');
+        this.saveApiConfigBtn = document.getElementById('save-api-config');
+        this.resetApiConfigBtn = document.getElementById('reset-api-config');
         this.apiStatus = document.getElementById('api-status');
-        this.generateTasksBtn = document.getElementById('generateTasksBtn');
     }
 };
 
@@ -527,8 +524,13 @@ function validateCustomPrompt(prompt) {
 }
 
 async function testCustomPrompt() {
+    console.log('testCustomPrompt called');
     const promptTextarea = document.getElementById('custom-prompt');
-    if (!promptTextarea) return;
+    if (!promptTextarea) {
+        console.error('Custom prompt textarea not found');
+        displayError('Custom prompt textarea not found');
+        return;
+    }
     
     const prompt = promptTextarea.value.trim();
     if (!prompt) {
@@ -536,17 +538,17 @@ async function testCustomPrompt() {
         return;
     }
     
-    // Validate prompt
-    const validation = validateCustomPrompt(prompt);
-    if (!validation.isValid) {
-        displayError(`Invalid prompt: ${validation.error}`);
+    // Check if API key is available
+    const apiKey = CONFIG.GEMINI_API_KEYS[0] || CONFIG.GEMINI_API_KEYS[1];
+    if (!apiKey) {
+        displayError('Please configure your Gemini API key first');
         return;
     }
     
     const testBtn = document.getElementById('test-prompt');
     if (testBtn) {
         testBtn.disabled = true;
-        testBtn.textContent = 'Testing...';
+        testBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing...';
     }
     
     try {
@@ -561,17 +563,30 @@ async function testCustomPrompt() {
         };
         
         const processedPrompt = processPromptWithData(prompt, testData);
-        const result = await callGeminiAPI(processedPrompt);
+        console.log('Testing prompt:', processedPrompt);
         
-        showTestResults(result);
+        const result = await callGeminiAPI(processedPrompt);
+        console.log('API response:', result);
+        
+        showTestResults({
+            success: true,
+            prompt: processedPrompt,
+            response: result,
+            timestamp: new Date().toISOString()
+        });
         
     } catch (error) {
         console.error('Prompt test failed:', error);
-        displayError(`Prompt test failed: ${error.message}`);
+        showTestResults({
+            success: false,
+            prompt: prompt,
+            error: error.message,
+            timestamp: new Date().toISOString()
+        });
     } finally {
         if (testBtn) {
             testBtn.disabled = false;
-            testBtn.textContent = 'Test Prompt';
+            testBtn.innerHTML = '<i class="fas fa-flask"></i> Test Prompt';
         }
     }
 }
@@ -587,32 +602,50 @@ function processPromptWithData(prompt, data) {
 }
 
 function showTestResults(testResult) {
-    // Create modal for test results
-    const modal = document.createElement('div');
-    modal.className = 'test-results-modal';
-    modal.innerHTML = `
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Prompt Test Results</h3>
-                <button class="close-btn" onclick="closeTestModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="test-status success">
-                    ✅ Test Successful
-                </div>
-                <div class="test-response">
-                    <h4>Gemini Response:</h4>
-                    <pre>${testResult}</pre>
-                </div>
-            </div>
+    const modal = document.getElementById('testResultsModal');
+    const resultsBody = document.getElementById('testResultsBody');
+    
+    if (!modal || !resultsBody) {
+        console.error('Test results modal not found');
+        return;
+    }
+    
+    // Clear previous results
+    resultsBody.innerHTML = '';
+    
+    // Create result content
+    const resultHTML = `
+        <div class="test-result-item ${testResult.success ? 'test-result-success' : 'test-result-error'}">
+            <h4>
+                <i class="fas fa-${testResult.success ? 'check-circle' : 'exclamation-circle'}"></i>
+                ${testResult.success ? 'Test Successful' : 'Test Failed'}
+            </h4>
+            <p><strong>Timestamp:</strong> ${new Date(testResult.timestamp).toLocaleString()}</p>
+            <p><strong>Status:</strong> ${testResult.success ? 'API call completed successfully' : 'API call failed'}</p>
+            
+            ${testResult.success ? `
+                <p><strong>Response Preview:</strong></p>
+                <pre>${testResult.response.substring(0, 500)}${testResult.response.length > 500 ? '...' : ''}</pre>
+            ` : `
+                <p><strong>Error:</strong> ${testResult.error}</p>
+            `}
+            
+            <p><strong>Processed Prompt:</strong></p>
+            <pre>${testResult.prompt.substring(0, 300)}${testResult.prompt.length > 300 ? '...' : ''}</pre>
         </div>
     `;
     
-    // Add to page
-    document.body.appendChild(modal);
+    resultsBody.innerHTML = resultHTML;
     
     // Show modal
     modal.style.display = 'block';
+    
+    // Add click outside to close
+    modal.onclick = function(event) {
+        if (event.target === modal) {
+            closeTestModal();
+        }
+    };
 }
 
 function closeTestModal() {
@@ -690,20 +723,20 @@ function loadApiConfiguration() {
     const savedApiKey = localStorage.getItem('geminiApiKey1');
     const savedModel = localStorage.getItem('selectedModel');
 
-    if (savedApiKey && DOM.geminiApiKeyInput) {
-        DOM.geminiApiKeyInput.value = savedApiKey;
+    if (savedApiKey && DOM.apiKeyInput) {
+        DOM.apiKeyInput.value = savedApiKey;
         CONFIG.GEMINI_API_KEYS[0] = savedApiKey;
     }
     
-    if (savedModel && DOM.geminiModelSelect) {
-        DOM.geminiModelSelect.value = savedModel;
+    if (savedModel && DOM.modelSelect) {
+        DOM.modelSelect.value = savedModel;
         CONFIG.DEFAULT_MODEL = savedModel;
     }
 }
 
 function saveApiConfiguration() {
-    const apiKey = DOM.geminiApiKeyInput?.value.trim();
-    const selectedModel = DOM.geminiModelSelect?.value;
+    const apiKey = DOM.apiKeyInput?.value.trim();
+    const selectedModel = DOM.modelSelect?.value;
     
     if (!apiKey) {
         showApiStatus('Please enter a Gemini API key', 'error');
@@ -727,8 +760,8 @@ function saveApiConfiguration() {
 }
 
 async function testApiKey() {
-    const apiKey = DOM.geminiApiKeyInput?.value.trim();
-    const selectedModel = DOM.geminiModelSelect?.value;
+    const apiKey = DOM.apiKeyInput?.value.trim();
+    const selectedModel = DOM.modelSelect?.value;
         
                 if (!apiKey) {
         showApiStatus('Please enter a Gemini API key first', 'error');
@@ -740,7 +773,7 @@ async function testApiKey() {
         return;
     }
     
-    const button = DOM.testGeminiApiBtn;
+    const button = DOM.testApiKeyBtn;
     if (button) {
         button.disabled = true;
         button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing...';
@@ -769,7 +802,7 @@ async function testApiKey() {
 }
 
 function togglePasswordVisibility() {
-    const input = DOM.geminiApiKeyInput;
+    const input = DOM.apiKeyInput;
     const button = DOM.toggleApiKeyBtn;
     
     if (input && button) {
@@ -806,12 +839,12 @@ function addEventListeners() {
     }
     
     // API Configuration
-    if (DOM.saveGeminiConfigBtn) {
-        DOM.saveGeminiConfigBtn.addEventListener('click', saveApiConfiguration);
+    if (DOM.saveApiConfigBtn) {
+        DOM.saveApiConfigBtn.addEventListener('click', saveApiConfiguration);
     }
     
-    if (DOM.testGeminiApiBtn) {
-        DOM.testGeminiApiBtn.addEventListener('click', testApiKey);
+    if (DOM.testApiKeyBtn) {
+        DOM.testApiKeyBtn.addEventListener('click', testApiKey);
     }
     
     if (DOM.toggleApiKeyBtn) {
@@ -853,7 +886,7 @@ function testCSVDownload() {
         createTestDataForDownload();
         return;
     }
-    
+            
     const tbody = table.querySelector('tbody');
     if (!tbody || tbody.children.length === 0) {
         console.log('No tasks in table - creating test data...');
