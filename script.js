@@ -832,24 +832,8 @@ function loadSavedPrompt() {
             promptTextarea.value = savedPrompt;
             promptTextarea.placeholder = 'Custom prompt loaded. Modify as needed.';
         } else {
-            // Provide enhanced placeholder with better guidance
-            promptTextarea.placeholder = `Create your custom prompt here for 100% accuracy.
-
-REQUIRED PLACEHOLDERS:
-{{education-level}} - Student's education level
-{{education-year}} - Current year of study  
-{{semester}} - Current semester
-{{main-skill}} - Primary skill focus
-{{skill-level}} - Skill difficulty level
-{{task-count}} - Number of tasks to generate
-
-EXAMPLE FORMAT:
-You are an expert employability trainer. Generate {{task-count}} tasks for {{education-level}} students in {{education-year}} ({{semester}}) focusing on {{main-skill}} at {{skill-level}} level.
-
-OUTPUT FORMAT:
-Skill Level | Bloom Level | Main Skill | Subskill | Heading | Content | Task | Application
-
-Each task should be practical, engaging, and career-relevant.`;
+            // Provide clean, simple placeholder
+            promptTextarea.placeholder = 'Create your custom prompt here. Use placeholders like {{education-level}}, {{main-skill}}, {{skill-level}}, {{task-count}} for dynamic content.';
         }
     }
 }
