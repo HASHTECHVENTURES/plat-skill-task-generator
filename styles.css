@@ -1,4 +1,4 @@
-/* Reset and Base Styles - GitHub Inspired */
+/* Reset and Base Styles */
 * {
     margin: 0;
     padding: 0;
@@ -6,10 +6,10 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
-    line-height: 1.5;
-    color: #24292f;
-    background: #ffffff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
 }
 
@@ -19,32 +19,30 @@ body {
     padding: 20px;
 }
 
-/* Header - GitHub Inspired */
+/* Header */
 .header {
-    background: #f6f8fa;
-    color: #24292f;
-    padding: 24px 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 30px 0;
     text-align: center;
-    margin-bottom: 24px;
-    border-bottom: 1px solid #d0d7de;
+    margin-bottom: 40px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .header-content h1 {
-    font-size: 2rem;
-    margin-bottom: 8px;
-    font-weight: 600;
-    color: #24292f;
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    font-weight: 700;
 }
 
 .header-content h1 i {
-    color: #0969da;
-    margin-right: 12px;
+    color: #ffd700;
+    margin-right: 15px;
 }
 
 .header-content p {
-    font-size: 1rem;
-    color: #656d76;
-    font-weight: 400;
+    font-size: 1.1rem;
+    opacity: 0.9;
 }
 
 .orange-digital-brand {
@@ -200,41 +198,42 @@ body {
     }
 }
 
-/* Main Content - GitHub Inspired */
+/* Main Content */
 .main-content {
-    background: #ffffff;
-    border: 1px solid #d0d7de;
-    border-radius: 6px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
     overflow: hidden;
 }
 
-/* Form Styles - GitHub Inspired */
+/* Form Styles */
 .task-form {
-    padding: 24px;
+    padding: 40px;
 }
 
 .form-section {
-    margin-bottom: 24px;
-    padding: 16px;
+    margin-bottom: 30px;
+    padding: 25px;
     background: #ffffff;
-    border: 1px solid #d0d7de;
-    border-radius: 6px;
-    border-left: 3px solid #0969da;
+    border-radius: 10px;
+    border-left: 4px solid #667eea;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .form-section h2 {
-    color: #24292f;
-    margin-bottom: 16px;
-    font-size: 1.25rem;
-    font-weight: 600;
+    color: #1a252f;
+    margin-bottom: 20px;
+    font-size: 1.4rem;
+    font-weight: 700;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
 }
 
 .form-section h2 i {
-    color: #0969da;
+    color: #667eea;
 }
 
 .form-grid {
@@ -249,24 +248,25 @@ body {
 }
 
 .form-group label {
-    font-weight: 600;
-    margin-bottom: 6px;
-    color: #24292f;
-    font-size: 0.875rem;
-    display: block;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #2c3e50;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
-    padding: 8px 12px;
-    border: 1px solid #d0d7de;
-    border-radius: 6px;
-    font-size: 0.875rem;
-    font-weight: 400;
-    color: #24292f;
-    transition: border-color 0.2s ease;
-    background: #ffffff;
+    padding: 12px 15px;
+    border: 2px solid #e1e5e9;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #2c3e50;
+    transition: all 0.3s ease;
+    background: white;
     width: 100%;
 }
 
@@ -274,8 +274,8 @@ body {
 .form-group select:focus,
 .form-group textarea:focus {
     outline: none;
-    border-color: #0969da;
-    box-shadow: 0 0 0 2px rgba(9, 105, 218, 0.3);
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .checkbox-group {
@@ -298,58 +298,63 @@ body {
     accent-color: #667eea;
 }
 
-/* Buttons - GitHub Inspired */
+/* Buttons */
 .form-actions {
     text-align: center;
-    margin-top: 24px;
+    margin-top: 30px;
 }
 
 .btn {
-    padding: 8px 16px;
-    border: 1px solid;
-    border-radius: 6px;
-    font-size: 0.875rem;
-    font-weight: 500;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 10px;
     text-decoration: none;
-    line-height: 1.25;
 }
 
 .btn-primary {
-    background: #238636;
-    border-color: #238636;
-    color: #ffffff;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
 }
 
 .btn-primary:hover {
-    background: #2ea043;
-    border-color: #2ea043;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
 }
 
 .btn-secondary {
-    background: #f6f8fa;
-    border-color: #d0d7de;
-    color: #24292f;
+    background: #6c757d;
+    color: white;
 }
 
 .btn-secondary:hover {
-    background: #f3f4f6;
-    border-color: #d0d7de;
+    background: #5a6268;
+    transform: translateY(-2px);
 }
 
 .btn-outline {
-    background: #ffffff;
-    border-color: #d0d7de;
-    color: #24292f;
+    background: transparent;
+    color: #667eea;
+    border: 2px solid #667eea;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .btn-outline:hover {
-    background: #f6f8fa;
-    border-color: #d0d7de;
+    background: #667eea;
+    color: white;
 }
 
 /* Loading State */
@@ -461,31 +466,84 @@ body {
     cursor: not-allowed;
 }
 
-/* Tasks Table - GitHub Inspired */
+/* Tasks Table */
 .tasks-table-container {
     overflow-x: auto;
-    border: 1px solid #d0d7de;
-    border-radius: 6px;
-    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 .tasks-table {
     width: 100%;
     border-collapse: collapse;
     background: white;
-    font-size: 0.875rem;
+    font-size: 0.9rem;
 }
 
 /* Row Selection Styles */
-.row-selection-info {
-    background: #e3f2fd;
-    color: #1976d2;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-weight: 600;
+.select-all-checkbox {
+    width: 18px;
+    height: 18px;
+    accent-color: #667eea;
+    cursor: pointer;
+}
+
+.select-all-label {
     font-size: 0.9rem;
-    margin: 10px 0;
-    display: inline-block;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    margin-left: 8px;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.task-checkbox {
+    width: 18px;
+    height: 18px;
+    accent-color: #667eea;
+    cursor: pointer;
+    margin-right: 8px;
+}
+
+.selection-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-right: 15px;
+}
+
+.selection-counter {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #667eea;
+    background: #f0f4ff;
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 2px solid #e3f2fd;
+    min-width: 100px;
+    text-align: center;
+}
+
+.tasks-table tr.selected {
+    background: #e3f2fd !important;
+    border-left: 4px solid #667eea;
+}
+
+.tasks-table tr.selected td:first-child {
+    background: #e3f2fd;
+}
+
+.tasks-table td:first-child {
+    text-align: center;
+    width: 50px;
+    min-width: 50px;
+}
+
+.tasks-table th:first-child {
+    text-align: center;
+    width: 50px;
+    min-width: 50px;
 }
 
 .tasks-table th:first-child {
@@ -523,29 +581,28 @@ body {
 }
 
 .tasks-table th {
-    background: #f6f8fa;
-    color: #24292f;
-    padding: 12px 8px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 15px 12px;
     text-align: left;
     font-weight: 600;
     position: sticky;
     top: 0;
     z-index: 10;
-    border-bottom: 1px solid #d0d7de;
 }
 
 .tasks-table td {
-    padding: 8px;
-    border-bottom: 1px solid #d0d7de;
+    padding: 12px;
+    border-bottom: 1px solid #e1e5e9;
     vertical-align: top;
 }
 
 .tasks-table tr:nth-child(even) {
-    background: #f6f8fa;
+    background: #f8f9fa;
 }
 
 .tasks-table tr:hover {
-    background: #f3f4f6;
+    background: #e3f2fd;
 }
 
 /* Skill Level Badges */
@@ -584,6 +641,155 @@ body {
     background: #f8f9fa;
     color: #495057;
     border: 1px solid #dee2e6;
+}
+
+/* Main Skill Badges */
+.main-skill {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: capitalize;
+    background: #f3e5f5;
+    color: #7b1fa2;
+    border: 1px solid #e1bee7;
+}
+
+/* Sub Skill Badges */
+.sub-skill {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: capitalize;
+    background: #e8f5e8;
+    color: #2e7d32;
+    border: 1px solid #c8e6c9;
+}
+
+/* Test Results Modal */
+.test-results-modal {
+    display: none;
+    position: fixed;
+    z-index: 10000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    -webkit-backdrop-filter: blur(5px);
+    backdrop-filter: blur(5px);
+}
+
+.test-results-content {
+    background-color: white;
+    margin: 5% auto;
+    padding: 0;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 800px;
+    max-height: 80vh;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    animation: modalSlideIn 0.3s ease;
+}
+
+.test-results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 12px 12px 0 0;
+}
+
+.test-results-header h3 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    transition: background-color 0.3s ease;
+}
+
+.close-modal:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.test-results-body {
+    padding: 25px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.test-result-item {
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border-left: 4px solid;
+}
+
+.test-result-success {
+    background-color: #f8fff8;
+    border-left-color: #28a745;
+}
+
+.test-result-error {
+    background-color: #fff8f8;
+    border-left-color: #dc3545;
+}
+
+.test-result-item h4 {
+    margin: 0 0 15px 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.test-result-success h4 {
+    color: #28a745;
+}
+
+.test-result-error h4 {
+    color: #dc3545;
+}
+
+.test-result-item p {
+    margin: 8px 0;
+    color: #555;
+}
+
+.test-result-item pre {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+    font-size: 13px;
+    line-height: 1.4;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Footer */

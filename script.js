@@ -1,11 +1,7 @@
-/**
- * PLAT SKILL - Advanced Employability Task Generator
- * AI-Powered Task Generation with Enhanced Accuracy
- * Version: 2.0.0
- * Author: HASHTECHVENTURES
- */
+// PLAT SKILL Employability Task Generator - Gemini Only
+// Clean version with custom prompts only
 
-// Enhanced Configuration
+// Configuration
 const CONFIG = {
     // Gemini API Configuration
     GEMINI_API_KEYS: [
@@ -14,20 +10,17 @@ const CONFIG = {
     ],
     GEMINI_API_URL: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
     
-    // Available Gemini Models with enhanced descriptions
+    // Available Gemini Models
     AVAILABLE_MODELS: {
-        'gemini-2.0-flash': 'Gemini 2.0 Flash (Latest & Most Accurate)',
-        'gemini-1.5-flash': 'Gemini 1.5 Flash (Balanced & Reliable)',
-        'gemini-1.5-pro': 'Gemini 1.5 Pro (High Quality)'
+        'gemini-2.0-flash': 'Gemini 2.0 Flash (Latest & Fastest)',
+        'gemini-1.5-flash': 'Gemini 1.5 Flash (Balanced)'
     },
     
     // Default model
     DEFAULT_MODEL: 'gemini-2.0-flash',
     
-    // Required form fields
     REQUIRED_FIELDS: ['education-level', 'education-year', 'semester', 'main-skill', 'skill-level', 'task-count'],
     
-    // Enhanced language support
     SUPPORTED_LANGUAGES: {
         'en': 'English',
         'hi': 'Hindi',
@@ -39,19 +32,7 @@ const CONFIG = {
         'kn': 'Kannada',
         'gu': 'Gujarati',
         'pa': 'Punjabi',
-        'or': 'Odia',
-        'as': 'Assamese',
-        'ne': 'Nepali'
-    },
-    
-    
-    // Enhanced validation rules
-    VALIDATION_RULES: {
-        MIN_TASK_COUNT: 1,
-        MAX_TASK_COUNT: 20,
-        MIN_PROMPT_LENGTH: 50,
-        MAX_PROMPT_LENGTH: 5000,
-        REQUIRED_PLACEHOLDERS: ['{{education-level}}', '{{education-year}}', '{{semester}}', '{{main-skill}}', '{{skill-level}}', '{{task-count}}']
+        'or': 'Odia'
     }
 };
 
@@ -80,22 +61,16 @@ const DOM = {
     tasksTableBody: null,
     newTasksBtn: null,
     downloadExcelBtn: null,
-    translateTasksBtn: null,
-    preferredLanguageSelect: null,
+    downloadSelectedExcelBtn: null,
+    selectAllCheckbox: null,
+    selectionCounter: null,
     geminiApiKeyInput: null,
     geminiModelSelect: null,
     testGeminiApiBtn: null,
     saveGeminiConfigBtn: null,
-    toggleApiKeyBtn: null,
+    resetGeminiConfigBtn: null,
     apiStatus: null,
     generateTasksBtn: null,
-    selectColumnsBtn: null,
-    columnSelectionModal: null,
-    downloadSelectedColumnsBtn: null,
-    selectAllColumnsBtn: null,
-    deselectAllColumnsBtn: null,
-    selectAllRowsCheckbox: null,
-    selectedRowsCount: null,
     
     init() {
         this.form = document.getElementById('taskForm');
@@ -104,25 +79,18 @@ const DOM = {
         this.tasksTableBody = document.getElementById('tasksTableBody');
         this.newTasksBtn = document.getElementById('newTasks');
         this.downloadExcelBtn = document.getElementById('downloadExcel');
-        this.translateTasksBtn = document.getElementById('translateTasks');
-        this.preferredLanguageSelect = document.getElementById('preferred-language');
-        
+        this.downloadSelectedExcelBtn = document.getElementById('downloadSelectedExcel');
+        this.selectAllCheckbox = document.getElementById('selectAllTasks');
+        this.selectionCounter = document.getElementById('selectionCounter');
         
         // API Configuration elements
         this.geminiApiKeyInput = document.getElementById('gemini-api-key');
         this.geminiModelSelect = document.getElementById('gemini-model');
         this.testGeminiApiBtn = document.getElementById('test-gemini-api');
         this.saveGeminiConfigBtn = document.getElementById('save-gemini-config');
-        this.toggleApiKeyBtn = document.getElementById('toggle-api-key');
+        this.resetGeminiConfigBtn = document.getElementById('reset-gemini-config');
         this.apiStatus = document.getElementById('api-status');
         this.generateTasksBtn = document.getElementById('generateTasksBtn');
-        this.selectColumnsBtn = document.getElementById('selectColumns');
-        this.columnSelectionModal = document.getElementById('columnSelectionModal');
-        this.downloadSelectedColumnsBtn = document.getElementById('downloadSelectedColumns');
-        this.selectAllColumnsBtn = document.getElementById('selectAllColumns');
-        this.deselectAllColumnsBtn = document.getElementById('deselectAllColumns');
-        this.selectAllRowsCheckbox = document.getElementById('selectAllRows');
-        this.selectedRowsCount = document.getElementById('selectedRowsCount');
     }
 };
 
@@ -252,199 +220,80 @@ async function callGeminiAPI(prompt, model = CONFIG.DEFAULT_MODEL) {
     return data.candidates[0].content.parts[0].text;
 }
 
-// Enhanced custom prompt system - CUSTOM PROMPT ONLY
+// Custom prompt system - no hardcoded prompts
 function createEmployabilityPrompt(data) {
-    // Get custom prompt - MANDATORY
+    // Get custom prompt - NO FALLBACK TO DEFAULT
     const customPrompt = localStorage.getItem('customPrompt');
     
-    if (!customPrompt || customPrompt.trim().length < CONFIG.VALIDATION_RULES.MIN_PROMPT_LENGTH) {
-        throw new Error('No custom prompt found or prompt too short. Please create and save a custom prompt first. The system requires a custom prompt for optimal accuracy.');
+    if (!customPrompt) {
+        throw new Error('No custom prompt found. Please create and save a custom prompt first.');
     }
     
-    // Enhanced validation with detailed feedback
-    const validation = validatePromptCompleteness(customPrompt, data);
-    if (!validation.isValid) {
-        throw new Error(`Custom prompt validation failed: ${validation.error}. Please check your custom prompt and ensure it includes all required placeholders.`);
-    }
-    
-    // Process prompt with enhanced data replacement
-    const processedPrompt = processPromptWithData(customPrompt, data);
-    
-    // Add quality enhancement instructions for better accuracy
-    const enhancedPrompt = addQualityEnhancements(processedPrompt, data);
-    
-    // Log the processed prompt for debugging
-    console.log('Using CUSTOM PROMPT - Processed preview:', enhancedPrompt.substring(0, 300) + '...');
-    
-    return enhancedPrompt;
-}
-
-// Enhanced prompt validation
-function validatePromptCompleteness(prompt, data) {
-    const requiredPlaceholders = CONFIG.VALIDATION_RULES.REQUIRED_PLACEHOLDERS;
-    const missingPlaceholders = requiredPlaceholders.filter(placeholder => !prompt.includes(placeholder));
+    // Validate that all required placeholders are present in custom prompt
+    const requiredPlaceholders = ['{{education-level}}', '{{education-year}}', '{{semester}}', '{{main-skill}}', '{{skill-level}}', '{{task-count}}'];
+    const missingPlaceholders = requiredPlaceholders.filter(placeholder => !customPrompt.includes(placeholder));
     
     if (missingPlaceholders.length > 0) {
-        return {
-            isValid: false,
-            error: `Missing required placeholders: ${missingPlaceholders.join(', ')}`
-        };
+        throw new Error(`Custom prompt missing required placeholders: ${missingPlaceholders.join(', ')}. Please add these placeholders to your custom prompt.`);
     }
     
-    // Check prompt length
-    if (prompt.length < CONFIG.VALIDATION_RULES.MIN_PROMPT_LENGTH) {
-        return {
-            isValid: false,
-            error: `Prompt too short. Minimum ${CONFIG.VALIDATION_RULES.MIN_PROMPT_LENGTH} characters required`
-        };
-    }
+    // Process ONLY the custom prompt with data replacement
+    const processedPrompt = customPrompt
+        .replace(/\{\{education-level\}\}/g, data['education-level'])
+        .replace(/\{\{education-year\}\}/g, data['education-year'])
+        .replace(/\{\{semester\}\}/g, data.semester)
+        .replace(/\{\{main-skill\}\}/g, data['main-skill'])
+        .replace(/\{\{skill-level\}\}/g, data['skill-level'])
+        .replace(/\{\{task-count\}\}/g, data['task-count']);
     
-    if (prompt.length > CONFIG.VALIDATION_RULES.MAX_PROMPT_LENGTH) {
-        return {
-            isValid: false,
-            error: `Prompt too long. Maximum ${CONFIG.VALIDATION_RULES.MAX_PROMPT_LENGTH} characters allowed`
-        };
-    }
-    
-    return { isValid: true };
-}
-
-// Enhanced data processing with validation
-function processPromptWithData(prompt, data) {
-    // Validate data completeness
-    const missingFields = CONFIG.REQUIRED_FIELDS.filter(field => !data[field] || data[field].trim() === '');
-    if (missingFields.length > 0) {
-        throw new Error(`Missing required data: ${missingFields.join(', ')}`);
-    }
-    
-    // Process prompt with data replacement
-    let processedPrompt = prompt;
-    
-    // Replace all placeholders with actual data
-    Object.keys(data).forEach(key => {
-        const placeholder = `{{${key}}}`;
-        const value = data[key] || 'N/A';
-        processedPrompt = processedPrompt.replace(new RegExp(placeholder, 'g'), value);
-    });
+    // Log the processed prompt for debugging (first 200 chars)
+    console.log('Using CUSTOM PROMPT - Processed preview:', processedPrompt.substring(0, 200) + '...');
     
     return processedPrompt;
 }
 
-// Add quality enhancements to prompt
-function addQualityEnhancements(prompt, data) {
-    const enhancements = [
-        '\n\n**FINAL INSTRUCTIONS:**',
-        '1. Ensure 100% accuracy in table formatting',
-        '2. Each row must have exactly 8 columns separated by |',
-        '3. Use clear, professional language',
-        '4. Make tasks practical and actionable',
-        '5. Include specific examples and scenarios',
-        `6. Generate exactly ${data['task-count']} tasks`,
-        '7. Double-check formatting before responding',
-        '\n**OUTPUT FORMAT VERIFICATION:**',
-        'Skill Level | Bloom Level | Main Skill | Subskill | Heading | Content | Task | Application',
-        '\nGenerate the table now with perfect formatting.'
-    ];
-    
-    return prompt + enhancements.join('\n');
-}
-
-// Enhanced parsing function with improved accuracy
+// Parse employability tasks from AI response
 function parseEmployabilityTasks(text, studentData) {
     const tasks = [];
     const lines = text.split('\n').filter(line => line.trim());
     
-    console.log('Parsing AI response...', lines.length, 'lines found');
-    
     for (const line of lines) {
-        // Enhanced line filtering for better accuracy
-        if (isValidTaskLine(line)) {
-            const columns = parseTaskLine(line);
+        if (line.includes('|') && !line.includes('Skill Level') && !line.includes('---')) {
+            const columns = line.split('|').map(col => col.trim()).filter(col => col);
             
-            if (columns && columns.length >= 6) {
-                const task = {
-                    skillLevel: cleanText(columns[0]) || 'N/A',
-                    bloomLevel: cleanText(columns[1]) || 'N/A',
-                    mainSkill: cleanText(columns[2]) || 'N/A',
-                    subskill: cleanText(columns[3]) || 'N/A',
-                    heading: cleanText(columns[4]) || 'N/A',
-                    content: cleanText(columns[5]) || 'N/A',
-                    task: cleanText(columns[6]) || 'N/A',
-                    application: cleanText(columns[7]) || 'N/A'
-                };
-                
-                // Validate task quality
-                if (isValidTask(task)) {
-                    tasks.push(task);
-                }
+            if (columns.length >= 8) {
+                // New 8-column format
+                tasks.push({
+                    skillLevel: columns[0],
+                    bloomLevel: columns[1],
+                    mainSkill: columns[2],
+                    subSkill: columns[3],
+                    heading: columns[4],
+                    content: columns[5],
+                    task: columns[6],
+                    application: columns[7]
+                });
+            } else if (columns.length >= 6) {
+                // Old 6-column format - map to new format
+                console.warn('Detected old 6-column format, mapping to new format...');
+                tasks.push({
+                    skillLevel: columns[0],
+                    bloomLevel: columns[1],
+                    mainSkill: 'N/A', // Default value
+                    subSkill: 'N/A', // Default value
+                    heading: columns[2],
+                    content: columns[3],
+                    task: columns[4],
+                    application: columns[5]
+                });
             }
         }
     }
-    
-    console.log(`Successfully parsed ${tasks.length} tasks`);
     
     return {
         studentData,
         tasks: tasks
     };
-}
-
-// Enhanced line validation
-function isValidTaskLine(line) {
-    // Check if line contains pipe separators
-    if (!line.includes('|')) return false;
-    
-    // Skip header lines and separator lines
-    if (line.includes('Skill Level') || line.includes('---') || line.includes('===')) return false;
-    
-    // Skip lines that are too short (likely not task data)
-    if (line.length < 20) return false;
-    
-    // Check for minimum number of columns
-    const columnCount = (line.match(/\|/g) || []).length;
-    return columnCount >= 5; // At least 6 columns (5 separators)
-}
-
-// Enhanced line parsing with better error handling
-function parseTaskLine(line) {
-    try {
-        // Split by pipe and clean each column
-        const columns = line.split('|').map(col => col.trim());
-        
-        // Filter out empty columns at the end
-        while (columns.length > 0 && !columns[columns.length - 1]) {
-            columns.pop();
-        }
-        
-        return columns;
-    } catch (error) {
-        console.error('Error parsing line:', line, error);
-        return null;
-    }
-}
-
-// Clean and validate text content
-function cleanText(text) {
-    if (!text) return '';
-    
-    // Remove extra whitespace and clean up
-    let cleaned = text.trim();
-    
-    // Remove common formatting artifacts
-    cleaned = cleaned.replace(/^\*+|\*+$/g, ''); // Remove asterisks
-    cleaned = cleaned.replace(/^\-+|\-+$/g, ''); // Remove dashes
-    cleaned = cleaned.replace(/^#+\s*/, ''); // Remove markdown headers
-    
-    return cleaned;
-}
-
-// Validate task quality
-function isValidTask(task) {
-    // Check if essential fields have meaningful content
-    const hasEssentialContent = task.heading && task.heading !== 'N/A' && task.heading.length > 3;
-    const hasTaskContent = task.task && task.task !== 'N/A' && task.task.length > 10;
-    
-    return hasEssentialContent && hasTaskContent;
 }
 
 // Display results in table format
@@ -489,23 +338,22 @@ function populateTasksTable(tasks) {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>
-                <input type="checkbox" class="row-checkbox" data-index="${index}" data-task-id="${index}">
+                <input type="checkbox" class="task-checkbox" data-task-index="${index}">
             </td>
             <td><span class="skill-level ${task.skillLevel.toLowerCase()}">${task.skillLevel}</span></td>
             <td><span class="bloom-level">${task.bloomLevel || 'N/A'}</span></td>
-            <td>${task.mainSkill || 'N/A'}</td>
-            <td>${task.subskill || 'N/A'}</td>
-            <td><strong>${task.heading || 'N/A'}</strong></td>
-            <td>${task.content || 'N/A'}</td>
-            <td>${task.task || 'N/A'}</td>
-            <td>${task.application || 'N/A'}</td>
+            <td><span class="main-skill">${task.mainSkill || 'N/A'}</span></td>
+            <td><span class="sub-skill">${task.subSkill || 'N/A'}</span></td>
+            <td><strong>${task.heading}</strong></td>
+            <td>${task.content}</td>
+            <td>${task.task}</td>
+            <td>${task.application}</td>
         `;
         DOM.tasksTableBody.appendChild(row);
     });
     
-    // Add event listeners for row checkboxes
-    addRowSelectionListeners();
-    updateSelectedRowsCount();
+    // Initialize row selection functionality
+    initializeRowSelection();
 }
 
 // Translation functions
@@ -521,8 +369,6 @@ async function translateTasks(tasks, targetLanguage) {
             const translatedTask = {
                 skillLevel: task.skillLevel,
                 bloomLevel: task.bloomLevel,
-                mainSkill: await translateText(task.mainSkill, targetLanguage),
-                subskill: await translateText(task.subskill, targetLanguage),
                 heading: await translateText(task.heading, targetLanguage),
                 content: await translateText(task.content, targetLanguage),
                 task: await translateText(task.task, targetLanguage),
@@ -566,37 +412,28 @@ function downloadExcel() {
             return;
         }
 
-        // Get selected rows or all rows
-        const selectedRows = getSelectedRows();
-        const rowsToDownload = selectedRows.length > 0 ? selectedRows : window.originalTasks;
+        // Get all rows (excluding header)
+        const rows = Array.from(table.querySelectorAll('tbody tr'));
 
-        if (rowsToDownload.length === 0) {
+        if (rows.length === 0) {
             displayError('No tasks to download');
             return;
         }
 
-        // Create CSV content with header (excluding checkbox column)
+        // Create CSV content with header
         const headerRow = table.querySelector('thead tr');
-        const headerCells = Array.from(headerRow.querySelectorAll('th')).slice(1); // Skip checkbox column
+        const headerCells = Array.from(headerRow.querySelectorAll('th'));
         const headerContent = headerCells.map(cell => {
             const text = cell.textContent.replace(/"/g, '""');
             return `"${text}"`;
         }).join(',');
         
         // Add data rows
-        const dataContent = rowsToDownload.map(task => {
-            return [
-                task.skillLevel || 'N/A',
-                task.bloomLevel || 'N/A',
-                task.mainSkill || 'N/A',
-                task.subskill || 'N/A',
-                task.heading || 'N/A',
-                task.content || 'N/A',
-                task.task || 'N/A',
-                task.application || 'N/A'
-            ].map(text => {
-                const escapedText = (text || 'N/A').replace(/"/g, '""');
-                return `"${escapedText}"`;
+        const dataContent = rows.map(row => {
+            const cells = Array.from(row.querySelectorAll('td'));
+            return cells.map(cell => {
+                const text = cell.textContent.replace(/"/g, '""');
+                return `"${text}"`;
             }).join(',');
         }).join('\n');
         
@@ -612,204 +449,14 @@ function downloadExcel() {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+            URL.revokeObjectURL(url);
 
-        const message = selectedRows.length > 0 
-            ? `Successfully downloaded ${selectedRows.length} selected tasks!`
-            : `Successfully downloaded ${rowsToDownload.length} tasks!`;
-        showSuccess(message);
+        showSuccess(`Successfully downloaded ${rows.length} tasks!`);
         
     } catch (error) {
         console.error('CSV download error:', error);
         displayError(`Failed to download CSV file: ${error.message}`);
     }
-}
-
-// Column Selection Functions
-function openColumnModal() {
-    if (DOM.columnSelectionModal) {
-        DOM.columnSelectionModal.classList.remove('hidden');
-    }
-}
-
-function closeColumnModal() {
-    if (DOM.columnSelectionModal) {
-        DOM.columnSelectionModal.classList.add('hidden');
-    }
-}
-
-function selectAllColumns() {
-    const checkboxes = document.querySelectorAll('#columnSelectionModal input[type="checkbox"]');
-    checkboxes.forEach(checkbox => {
-        checkbox.checked = true;
-    });
-}
-
-function deselectAllColumns() {
-    const checkboxes = document.querySelectorAll('#columnSelectionModal input[type="checkbox"]');
-    checkboxes.forEach(checkbox => {
-        checkbox.checked = false;
-    });
-}
-
-function getSelectedColumns() {
-    const columnMapping = {
-        'col-skill-level': { key: 'skillLevel', header: 'Skill Level' },
-        'col-bloom-level': { key: 'bloomLevel', header: 'Bloom Level' },
-        'col-main-skill': { key: 'mainSkill', header: 'Main Skill' },
-        'col-subskill': { key: 'subskill', header: 'Subskill' },
-        'col-heading': { key: 'heading', header: 'Heading' },
-        'col-content': { key: 'content', header: 'Content' },
-        'col-task': { key: 'task', header: 'Task' },
-        'col-application': { key: 'application', header: 'Application' }
-    };
-    
-    const selectedColumns = [];
-    Object.keys(columnMapping).forEach(checkboxId => {
-        const checkbox = document.getElementById(checkboxId);
-        if (checkbox && checkbox.checked) {
-            selectedColumns.push(columnMapping[checkboxId]);
-        }
-    });
-    
-    return selectedColumns;
-}
-
-function downloadSelectedColumns() {
-    try {
-        if (!window.originalTasks) {
-            displayError('No tasks available to download');
-            return;
-        }
-
-        const selectedColumns = getSelectedColumns();
-        const selectedRows = getSelectedRows();
-        
-        if (selectedColumns.length === 0) {
-            displayError('Please select at least one column to download');
-            return;
-        }
-        
-        if (selectedRows.length === 0) {
-            displayError('Please select at least one row to download');
-            return;
-        }
-
-        // Create CSV content with selected columns and rows
-        const headerContent = selectedColumns.map(col => {
-            const text = col.header.replace(/"/g, '""');
-            return `"${text}"`;
-        }).join(',');
-        
-        // Add data rows for selected rows only
-        const dataContent = selectedRows.map(task => {
-            return selectedColumns.map(col => {
-                const text = (task[col.key] || 'N/A').replace(/"/g, '""');
-                return `"${text}"`;
-            }).join(',');
-        }).join('\n');
-        
-        const csvContent = headerContent + '\n' + dataContent;
-        
-        // Create and download CSV file
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        link.setAttribute('href', url);
-        link.setAttribute('download', `PLAT_SKILL_Tasks_Selected_${new Date().toISOString().split('T')[0]}.csv`);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-
-        showSuccess(`Successfully downloaded ${selectedRows.length} tasks with ${selectedColumns.length} selected columns!`);
-        closeColumnModal();
-        
-    } catch (error) {
-        console.error('CSV download error:', error);
-        displayError(`Failed to download CSV file: ${error.message}`);
-    }
-}
-
-// Row Selection Functions
-function addRowSelectionListeners() {
-    // Add event listener for "Select All" checkbox
-    if (DOM.selectAllRowsCheckbox) {
-        DOM.selectAllRowsCheckbox.addEventListener('change', handleSelectAllRows);
-    }
-    
-    // Add event listeners for individual row checkboxes
-    const rowCheckboxes = document.querySelectorAll('.row-checkbox');
-    rowCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', handleRowSelection);
-    });
-}
-
-function handleSelectAllRows() {
-    const rowCheckboxes = document.querySelectorAll('.row-checkbox');
-    const isChecked = DOM.selectAllRowsCheckbox.checked;
-    
-    rowCheckboxes.forEach(checkbox => {
-        checkbox.checked = isChecked;
-        const row = checkbox.closest('tr');
-        if (isChecked) {
-            row.classList.add('selected-row');
-        } else {
-            row.classList.remove('selected-row');
-        }
-    });
-    
-    updateSelectedRowsCount();
-}
-
-function handleRowSelection(event) {
-    const checkbox = event.target;
-    const row = checkbox.closest('tr');
-    
-    if (checkbox.checked) {
-        row.classList.add('selected-row');
-    } else {
-        row.classList.remove('selected-row');
-    }
-    
-    // Update "Select All" checkbox state
-    updateSelectAllCheckbox();
-    updateSelectedRowsCount();
-}
-
-function updateSelectAllCheckbox() {
-    const rowCheckboxes = document.querySelectorAll('.row-checkbox');
-    const checkedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
-    
-    if (checkedCheckboxes.length === 0) {
-        DOM.selectAllRowsCheckbox.indeterminate = false;
-        DOM.selectAllRowsCheckbox.checked = false;
-    } else if (checkedCheckboxes.length === rowCheckboxes.length) {
-        DOM.selectAllRowsCheckbox.indeterminate = false;
-        DOM.selectAllRowsCheckbox.checked = true;
-    } else {
-        DOM.selectAllRowsCheckbox.indeterminate = true;
-        DOM.selectAllRowsCheckbox.checked = false;
-    }
-}
-
-function updateSelectedRowsCount() {
-    const checkedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
-    const count = checkedCheckboxes.length;
-    
-    if (DOM.selectedRowsCount) {
-        DOM.selectedRowsCount.textContent = `${count} row${count !== 1 ? 's' : ''} selected`;
-    }
-}
-
-function getSelectedRows() {
-    const checkedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
-    const selectedIndices = Array.from(checkedCheckboxes).map(checkbox => 
-        parseInt(checkbox.getAttribute('data-index'))
-    );
-    
-    return selectedIndices.map(index => window.originalTasks[index]).filter(task => task);
 }
 
 // Prompt Management Functions
@@ -825,16 +472,10 @@ function loadSavedPrompt() {
     const promptTextarea = document.getElementById('custom-prompt');
     
     if (promptTextarea) {
-        // Load existing custom prompt if available
-        const savedPrompt = localStorage.getItem('customPrompt');
-        
-        if (savedPrompt) {
-            promptTextarea.value = savedPrompt;
-            promptTextarea.placeholder = 'Custom prompt loaded. Modify as needed.';
-        } else {
-            // Provide clean, simple placeholder
-            promptTextarea.placeholder = 'Create your custom prompt here. Use placeholders like {{education-level}}, {{main-skill}}, {{skill-level}}, {{task-count}} for dynamic content.';
-        }
+        // Clear any existing saved prompt and start fresh
+        promptTextarea.value = '';
+        localStorage.removeItem('customPrompt');
+        promptTextarea.placeholder = 'Create your custom prompt here. Use placeholders like {{education-level}}, {{main-skill}}, {{skill-level}}, {{task-count}}';
     }
 }
 
@@ -975,7 +616,7 @@ function showTestResults(testResult) {
 }
 
 function closeTestModal() {
-    const modal = document.querySelector('.test-results-modal');
+    const modal = document.getElementById('testResultsModal');
     if (modal) {
         modal.style.display = 'none';
     }
@@ -1039,23 +680,9 @@ function showSuccess(message) {
 }
 
 function getErrorMessage(error) {
-    // Enhanced error messages for better user guidance
-    if (error.message.includes('API')) {
-        return 'AI service temporarily unavailable. Please check your API key and try again.';
-    }
-    if (error.message.includes('prompt')) {
-        return 'Custom prompt issue detected. Please check your prompt format and required placeholders.';
-    }
-    if (error.message.includes('validation')) {
-        return 'Input validation failed. Please check all required fields and try again.';
-    }
-    if (error.message.includes('parsing')) {
-        return 'Task parsing failed. Please check your custom prompt format and try again.';
-    }
-    if (error.message.includes('network') || error.message.includes('fetch')) {
-        return 'Network error. Please check your internet connection and try again.';
-    }
-    return 'An unexpected error occurred. Please try again or contact support if the issue persists.';
+    if (error.message.includes('API')) return 'AI service temporarily unavailable. Please try again.';
+    if (error.message.includes('prompt')) return 'Please check your custom prompt and try again.';
+    return 'Something went wrong. Please try again.';
 }
 
 // API Configuration Functions
@@ -1178,34 +805,6 @@ function addEventListeners() {
         DOM.form.addEventListener('submit', handleFormSubmit);
     }
     
-    // Generate Tasks Button
-    if (DOM.generateTasksBtn) {
-        DOM.generateTasksBtn.addEventListener('click', async () => {
-            try {
-                // Validate form
-                const formData = new FormData(DOM.form);
-                const data = Object.fromEntries(formData.entries());
-                
-                if (!validateForm(data)) {
-                    return;
-                }
-                
-                // Show loading
-                showLoading();
-                
-                // Generate tasks
-                const result = await generateEmployabilityTasks(data);
-                
-                // Display results
-                await displayResults(result);
-                
-            } catch (error) {
-                console.error('Error generating tasks:', error);
-                displayError(getErrorMessage(error));
-            }
-        });
-    }
-    
     // API Configuration
     if (DOM.saveGeminiConfigBtn) {
         DOM.saveGeminiConfigBtn.addEventListener('click', saveApiConfiguration);
@@ -1231,53 +830,8 @@ function addEventListeners() {
         DOM.downloadExcelBtn.addEventListener('click', downloadExcel);
     }
     
-    if (DOM.selectColumnsBtn) {
-        DOM.selectColumnsBtn.addEventListener('click', openColumnModal);
-    }
-    
-    if (DOM.downloadSelectedColumnsBtn) {
-        DOM.downloadSelectedColumnsBtn.addEventListener('click', downloadSelectedColumns);
-    }
-    
-    if (DOM.selectAllColumnsBtn) {
-        DOM.selectAllColumnsBtn.addEventListener('click', selectAllColumns);
-    }
-    
-    if (DOM.deselectAllColumnsBtn) {
-        DOM.deselectAllColumnsBtn.addEventListener('click', deselectAllColumns);
-    }
-    
-    if (DOM.translateTasksBtn) {
-        DOM.translateTasksBtn.addEventListener('click', async () => {
-            if (!window.originalTasks) {
-                displayError('No tasks available to translate');
-        return;
-    }
-
-            const selectedLanguage = DOM.preferredLanguageSelect?.value || 'en';
-            
-            if (selectedLanguage === 'en') {
-                populateTasksTable(window.originalTasks);
-        return;
-    }
-            
-            try {
-                DOM.translateTasksBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Translating...';
-                DOM.translateTasksBtn.disabled = true;
-                
-                const translatedTasks = await translateTasks(window.originalTasks, selectedLanguage);
-                populateTasksTable(translatedTasks);
-                
-                showSuccess(`Successfully translated ${translatedTasks.length} tasks to ${CONFIG.SUPPORTED_LANGUAGES[selectedLanguage]}!`);
-        
-    } catch (error) {
-                console.error('Translation failed:', error);
-                displayError('Translation failed. Please try again.');
-    } finally {
-                DOM.translateTasksBtn.innerHTML = '<i class="fas fa-language"></i> Translate';
-                DOM.translateTasksBtn.disabled = false;
-            }
-        });
+    if (DOM.downloadSelectedExcelBtn) {
+        DOM.downloadSelectedExcelBtn.addEventListener('click', downloadSelectedExcel);
     }
     
 }
@@ -1287,6 +841,299 @@ function addPromptEventListeners() {
     document.getElementById('reset-prompt')?.addEventListener('click', resetToDefaultPrompt);
     document.getElementById('test-prompt')?.addEventListener('click', testCustomPrompt);
     document.getElementById('save-prompt')?.addEventListener('click', saveCustomPrompt);
+}
+
+// Test CSV download function
+function testCSVDownload() {
+    console.log('Testing CSV download functionality...');
+    
+    const table = document.getElementById('tasksTable');
+    if (!table) {
+        console.log('No table found - creating test data...');
+        createTestDataForDownload();
+        return;
+    }
+    
+    const tbody = table.querySelector('tbody');
+    if (!tbody || tbody.children.length === 0) {
+        console.log('No tasks in table - creating test data...');
+        createTestDataForDownload();
+        return;
+    }
+    
+    // Select all tasks for testing
+    const checkboxes = document.querySelectorAll('.task-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = true;
+    });
+    
+    // Update selection counter
+    updateSelectionCounter();
+    
+    // Try download
+    console.log('Attempting download with all tasks selected...');
+    downloadSelectedExcel();
+}
+
+// Create test data for download testing
+function createTestDataForDownload() {
+    const testTasks = [
+        {
+            skillLevel: 'Low',
+            bloomLevel: 'Remembering',
+            mainSkill: 'Communication',
+            subSkill: 'Verbal',
+            heading: 'Test Task 1',
+            content: 'This is a test task for download functionality',
+            task: 'Complete this test task to verify CSV download',
+            application: 'Apply this in real-world scenarios'
+        },
+        {
+            skillLevel: 'Medium',
+            bloomLevel: 'Understanding',
+            mainSkill: 'Problem-Solving',
+            subSkill: 'Analysis',
+            heading: 'Test Task 2',
+            content: 'Another test task for download verification',
+            task: 'Complete this second test task',
+            application: 'Use this in workplace situations'
+        }
+    ];
+    
+    // Create a temporary table for testing
+    const table = document.createElement('table');
+    table.id = 'testTasksTable';
+    table.className = 'tasks-table';
+    
+    const thead = document.createElement('thead');
+    thead.innerHTML = `
+        <tr>
+            <th>Select</th>
+            <th>Skill Level</th>
+            <th>Bloom Level</th>
+            <th>Main Skill</th>
+            <th>Sub Skill</th>
+            <th>Heading</th>
+            <th>Content</th>
+            <th>Task</th>
+            <th>Application</th>
+        </tr>
+    `;
+    
+    const tbody = document.createElement('tbody');
+    testTasks.forEach((task, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td><input type="checkbox" class="task-checkbox" checked></td>
+            <td>${task.skillLevel}</td>
+            <td>${task.bloomLevel}</td>
+            <td>${task.mainSkill}</td>
+            <td>${task.subSkill}</td>
+            <td>${task.heading}</td>
+            <td>${task.content}</td>
+            <td>${task.task}</td>
+            <td>${task.application}</td>
+        `;
+        tbody.appendChild(row);
+    });
+    
+    table.appendChild(thead);
+    table.appendChild(tbody);
+    
+    // Temporarily replace the main table
+    const mainTable = document.getElementById('tasksTable');
+    if (mainTable) {
+        mainTable.style.display = 'none';
+        mainTable.parentNode.insertBefore(table, mainTable);
+        
+        // Test download
+        setTimeout(() => {
+            downloadSelectedExcel();
+            
+            // Restore original table
+            setTimeout(() => {
+                table.remove();
+                mainTable.style.display = '';
+            }, 2000);
+        }, 500);
+    }
+}
+
+// Initialize row selection functionality
+function initializeRowSelection() {
+    // Add event listeners to individual checkboxes
+    const taskCheckboxes = document.querySelectorAll('.task-checkbox');
+    taskCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', handleTaskSelection);
+    });
+
+    // Add event listener to select all checkbox
+    if (DOM.selectAllCheckbox) {
+        DOM.selectAllCheckbox.addEventListener('change', handleSelectAll);
+    }
+
+    // Update selection counter
+    updateSelectionCounter();
+}
+
+// Handle individual task selection
+function handleTaskSelection(event) {
+    const checkbox = event.target;
+    const row = checkbox.closest('tr');
+    
+    if (checkbox.checked) {
+        row.classList.add('selected');
+    } else {
+        row.classList.remove('selected');
+    }
+    
+    updateSelectionCounter();
+    updateSelectAllState();
+}
+
+// Handle select all checkbox
+function handleSelectAll(event) {
+    const isChecked = event.target.checked;
+    const taskCheckboxes = document.querySelectorAll('.task-checkbox');
+    const rows = document.querySelectorAll('tbody tr');
+    
+    taskCheckboxes.forEach(checkbox => {
+        checkbox.checked = isChecked;
+    });
+    
+    rows.forEach(row => {
+        if (isChecked) {
+            row.classList.add('selected');
+        } else {
+            row.classList.remove('selected');
+        }
+    });
+    
+    updateSelectionCounter();
+}
+
+// Update selection counter
+function updateSelectionCounter() {
+    if (!DOM.selectionCounter) return;
+    
+    const selectedCount = document.querySelectorAll('.task-checkbox:checked').length;
+    const totalCount = document.querySelectorAll('.task-checkbox').length;
+    
+    DOM.selectionCounter.textContent = `${selectedCount} selected`;
+    
+    // Enable/disable download selected button
+    if (DOM.downloadSelectedExcelBtn) {
+        DOM.downloadSelectedExcelBtn.disabled = selectedCount === 0;
+    }
+}
+
+// Update select all checkbox state
+function updateSelectAllState() {
+    if (!DOM.selectAllCheckbox) return;
+    
+    const taskCheckboxes = document.querySelectorAll('.task-checkbox');
+    const checkedCount = document.querySelectorAll('.task-checkbox:checked').length;
+    
+    if (checkedCount === 0) {
+        DOM.selectAllCheckbox.checked = false;
+        DOM.selectAllCheckbox.indeterminate = false;
+    } else if (checkedCount === taskCheckboxes.length) {
+        DOM.selectAllCheckbox.checked = true;
+        DOM.selectAllCheckbox.indeterminate = false;
+    } else {
+        DOM.selectAllCheckbox.checked = false;
+        DOM.selectAllCheckbox.indeterminate = true;
+    }
+}
+
+// Download Selected CSV
+function downloadSelectedExcel() {
+    try {
+        console.log('Starting CSV download...');
+        
+        const table = document.getElementById('tasksTable');
+        if (!table) {
+            console.error('No tasks table found');
+            displayError('No tasks table found');
+            return;
+        }
+
+        console.log('Table found, checking for selected rows...');
+
+        // Get selected rows (excluding header)
+        const selectedRows = Array.from(table.querySelectorAll('tbody tr')).filter(row => {
+            const checkbox = row.querySelector('.task-checkbox');
+            return checkbox && checkbox.checked;
+        });
+
+        console.log(`Found ${selectedRows.length} selected rows`);
+
+        if (selectedRows.length === 0) {
+            console.log('No rows selected');
+            displayError('Please select at least one task to download');
+            return;
+        }
+
+        // Create CSV content with header
+        const headerRow = table.querySelector('thead tr');
+        if (!headerRow) {
+            console.error('No header row found');
+            displayError('Table structure error: No header row found');
+            return;
+        }
+
+        const headerCells = Array.from(headerRow.querySelectorAll('th'));
+        console.log(`Found ${headerCells.length} header cells`);
+        
+        const headerContent = headerCells.map(cell => {
+            const text = cell.textContent.trim().replace(/"/g, '""');
+            return `"${text}"`;
+        }).join(',');
+        
+        console.log('Header content created:', headerContent);
+
+        // Add selected data rows
+        const dataContent = selectedRows.map((row, index) => {
+            const cells = Array.from(row.querySelectorAll('td'));
+            console.log(`Row ${index}: ${cells.length} cells`);
+            return cells.map(cell => {
+                const text = cell.textContent.trim().replace(/"/g, '""');
+                return `"${text}"`;
+            }).join(',');
+        }).join('\n');
+        
+        const csvContent = headerContent + '\n' + dataContent;
+        console.log('CSV content created, length:', csvContent.length);
+        
+        // Create and download CSV file
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        
+        // Set download attributes
+        link.href = url;
+        link.download = `Employability_Tasks_Selected_${selectedRows.length}_${new Date().toISOString().split('T')[0]}.csv`;
+        link.style.display = 'none';
+        
+        // Add to DOM, click, and remove
+        document.body.appendChild(link);
+        console.log('Triggering download...');
+        link.click();
+        
+        // Clean up
+        setTimeout(() => {
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            console.log('Download cleanup completed');
+        }, 100);
+        
+        showSuccess(`Selected ${selectedRows.length} tasks downloaded successfully!`);
+        console.log('CSV download completed successfully');
+        
+    } catch (error) {
+        console.error('Error downloading selected CSV:', error);
+        displayError(`Failed to download CSV file: ${error.message}`);
+    }
 }
 
 // Initialize app when DOM is loaded
