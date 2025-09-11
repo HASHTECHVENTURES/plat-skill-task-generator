@@ -1,0 +1,42 @@
+{
+  "name": "plat-skill-task-generator",
+  "version": "2.0.0",
+  "description": "Advanced AI-powered employability task generator with enhanced accuracy and multi-language support",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "dev": "python -m http.server 8000",
+    "build": "echo 'No build process required for static files'",
+    "deploy": "echo 'Deploy to Vercel or GitHub Pages'"
+  },
+  "keywords": [
+    "ai",
+    "employability",
+    "tasks",
+    "generator",
+    "education",
+    "skills",
+    "career",
+    "gemini",
+    "multi-language",
+    "custom-prompts",
+    "row-selection",
+    "column-selection",
+    "csv-export"
+  ],
+  "author": "HASHTECHVENTURES",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HASHTECHVENTURES/plat-skill-task-generator.git"
+  },
+  "homepage": "https://plat-skill-task-generator.vercel.app",
+  "bugs": {
+    "url": "https://github.com/HASHTECHVENTURES/plat-skill-task-generator/issues"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "devDependencies": {},
+  "dependencies": {}
+}
