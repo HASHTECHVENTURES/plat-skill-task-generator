@@ -3,8 +3,7 @@
 const CONFIG = {
     // Gemini API Configuration
     GEMINI_API_KEYS: [
-        '',  // Primary key - will be loaded from localStorage
-        ''   // Secondary key - will be loaded from localStorage
+        ''  // Primary key - will be loaded from localStorage
     ],
     GEMINI_API_URL: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
     
@@ -20,17 +19,7 @@ const CONFIG = {
     REQUIRED_FIELDS: ['education-level', 'education-year', 'semester', 'main-skill', 'skill-level', 'task-count'],
     
     SUPPORTED_LANGUAGES: {
-        'en': 'English',
-        'hi': 'Hindi',
-        'mr': 'Marathi',
-        'bn': 'Bengali',
-        'te': 'Telugu',
-        'ta': 'Tamil',
-        'ml': 'Malayalam',
-        'kn': 'Kannada',
-        'gu': 'Gujarati',
-        'pa': 'Punjabi',
-        'or': 'Odia'
+        'en': 'English'
     }
 };
 
@@ -42,9 +31,6 @@ function loadConfigFromStorage() {
     
     if (savedGeminiKey1) {
         CONFIG.GEMINI_API_KEYS[0] = savedGeminiKey1;
-    }
-    if (savedGeminiKey2) {
-        CONFIG.GEMINI_API_KEYS[1] = savedGeminiKey2;
     }
     if (savedModel && CONFIG.AVAILABLE_MODELS[savedModel]) {
         CONFIG.DEFAULT_MODEL = savedModel;
@@ -58,17 +44,9 @@ const DOM = {
     resultsDiv: null,
     tasksTableBody: null,
     newTasksBtn: null,
-    downloadExcelBtn: null,
     downloadSelectedExcelBtn: null,
     selectAllCheckbox: null,
     selectionCounter: null,
-    geminiApiKeyInput: null,
-    geminiModelSelect: null,
-    testGeminiApiBtn: null,
-    saveGeminiConfigBtn: null,
-    resetGeminiConfigBtn: null,
-    apiStatus: null,
-    generateTasksBtn: null,
     
     init() {
         this.form = document.getElementById('taskForm');
@@ -76,7 +54,6 @@ const DOM = {
         this.resultsDiv = document.getElementById('results');
         this.tasksTableBody = document.getElementById('tasksTableBody');
         this.newTasksBtn = document.getElementById('newTasks');
-        this.downloadExcelBtn = document.getElementById('downloadExcel');
         this.downloadSelectedExcelBtn = document.getElementById('downloadSelectedExcel');
         this.selectAllCheckbox = document.getElementById('selectAllTasks');
         this.selectionCounter = document.getElementById('selectionCounter');
@@ -179,7 +156,7 @@ async function generateEmployabilityTasks(studentData) {
 
 // Call Gemini API
 async function callGeminiAPI(prompt, model = CONFIG.DEFAULT_MODEL) {
-    const apiKey = CONFIG.GEMINI_API_KEYS[0] || CONFIG.GEMINI_API_KEYS[1];
+    const apiKey = CONFIG.GEMINI_API_KEYS[0];
     
     if (!apiKey) {
         throw new Error('No Gemini API key found. Please add your API key.');
@@ -528,61 +505,6 @@ async function translateText(text, targetLanguage) {
 }
 
 
-// Download CSV
-function downloadExcel() {
-    try {
-        const table = document.getElementById('tasksTable');
-        if (!table) {
-            displayError('No tasks table found');
-            return;
-        }
-
-        // Get all rows (excluding header)
-        const rows = Array.from(table.querySelectorAll('tbody tr'));
-
-        if (rows.length === 0) {
-            displayError('No tasks to download');
-            return;
-        }
-
-        // Create CSV content with header
-        const headerRow = table.querySelector('thead tr');
-        const headerCells = Array.from(headerRow.querySelectorAll('th'));
-        const headerContent = headerCells.map(cell => {
-            const text = cell.textContent.replace(/"/g, '""');
-            return `"${text}"`;
-        }).join(',');
-        
-        // Add data rows
-        const dataContent = rows.map(row => {
-            const cells = Array.from(row.querySelectorAll('td'));
-            return cells.map(cell => {
-                const text = cell.textContent.replace(/"/g, '""');
-                return `"${text}"`;
-            }).join(',');
-        }).join('\n');
-        
-        const csvContent = headerContent + '\n' + dataContent;
-        
-        // Create and download CSV file
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        link.setAttribute('href', url);
-        link.setAttribute('download', `PLAT_SKILL_Tasks_${new Date().toISOString().split('T')[0]}.csv`);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-
-        showSuccess(`Successfully downloaded ${rows.length} tasks!`);
-        
-    } catch (error) {
-        console.error('CSV download error:', error);
-        displayError(`Failed to download CSV file: ${error.message}`);
-    }
-}
 
 // Prompt Management Functions
 function initializePromptManagement() {
@@ -692,7 +614,7 @@ async function testCustomPrompt() {
     }
     
     // Check if API key is available
-    const apiKey = CONFIG.GEMINI_API_KEYS[0] || CONFIG.GEMINI_API_KEYS[1];
+    const apiKey = CONFIG.GEMINI_API_KEYS[0];
     if (!apiKey) {
         displayError('Please configure your Gemini API key first');
         return;
@@ -954,20 +876,6 @@ async function testApiKey() {
     }
 }
 
-function togglePasswordVisibility() {
-    const input = DOM.apiKeyInput;
-    const button = DOM.toggleApiKeyBtn;
-    
-    if (input && button) {
-        if (input.type === 'password') {
-            input.type = 'text';
-            button.innerHTML = '<i class="fas fa-eye-slash"></i>';
-        } else {
-            input.type = 'password';
-            button.innerHTML = '<i class="fas fa-eye"></i>';
-        }
-    }
-}
 
 function showApiStatus(message, type = 'success') {
     if (DOM.apiStatus) {
@@ -1000,9 +908,6 @@ function addEventListeners() {
         DOM.testApiKeyBtn.addEventListener('click', testApiKey);
     }
     
-    if (DOM.toggleApiKeyBtn) {
-        DOM.toggleApiKeyBtn.addEventListener('click', togglePasswordVisibility);
-    }
     
     // Results buttons
     if (DOM.newTasksBtn) {
@@ -1012,9 +917,6 @@ function addEventListeners() {
         });
     }
     
-    if (DOM.downloadExcelBtn) {
-        DOM.downloadExcelBtn.addEventListener('click', downloadExcel);
-    }
     
     if (DOM.downloadSelectedExcelBtn) {
         DOM.downloadSelectedExcelBtn.addEventListener('click', downloadSelectedExcel);
@@ -1029,133 +931,7 @@ function addPromptEventListeners() {
     document.getElementById('save-prompt')?.addEventListener('click', saveCustomPrompt);
 }
 
-// Test CSV download function
-function testCSVDownload() {
-    console.log('Testing CSV download functionality...');
-    
-    const table = document.getElementById('tasksTable');
-    if (!table) {
-        console.log('No table found - creating test data...');
-        createTestDataForDownload();
-        return;
-    }
-            
-    const tbody = table.querySelector('tbody');
-    if (!tbody || tbody.children.length === 0) {
-        console.log('No tasks in table - creating test data...');
-        createTestDataForDownload();
-        return;
-    }
-    
-    // Select all tasks for testing
-    const checkboxes = document.querySelectorAll('.task-checkbox');
-    checkboxes.forEach(checkbox => {
-        checkbox.checked = true;
-    });
-    
-    // Update selection counter
-    updateSelectionCounter();
-    
-    // Try download
-    console.log('Attempting download with all tasks selected...');
-    downloadSelectedExcel();
-}
 
-// Create test data for download testing
-function createTestDataForDownload() {
-    const testTasks = [
-        {
-            educationLevel: 'bachelor',
-            educationYear: '2nd-year',
-            semester: '3rd-semester',
-            skillLevel: 'Low',
-            bloomLevel: 'Remembering',
-            mainSkill: 'Communication',
-            subSkill: 'Verbal',
-            heading: 'Test Task 1',
-            content: 'This is a test task for download functionality',
-            task: 'Complete this test task to verify CSV download',
-            application: 'Apply this in real-world scenarios'
-        },
-        {
-            educationLevel: 'bachelor',
-            educationYear: '2nd-year',
-            semester: '3rd-semester',
-            skillLevel: 'Medium',
-            bloomLevel: 'Understanding',
-            mainSkill: 'Problem-Solving',
-            subSkill: 'Analysis',
-            heading: 'Test Task 2',
-            content: 'Another test task for download verification',
-            task: 'Complete this second test task',
-            application: 'Use this in workplace situations'
-        }
-    ];
-    
-    // Create a temporary table for testing
-    const table = document.createElement('table');
-    table.id = 'testTasksTable';
-    table.className = 'tasks-table';
-    
-    const thead = document.createElement('thead');
-    thead.innerHTML = `
-        <tr>
-            <th>Select</th>
-            <th>Education Level</th>
-            <th>Education Year</th>
-            <th>Semester</th>
-            <th>Skill Level</th>
-            <th>Bloom Level</th>
-            <th>Main Skill</th>
-            <th>Sub Skill</th>
-            <th>Heading</th>
-            <th>Content</th>
-            <th>Task</th>
-            <th>Application</th>
-        </tr>
-    `;
-    
-    const tbody = document.createElement('tbody');
-    testTasks.forEach((task, index) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td><input type="checkbox" class="task-checkbox" checked></td>
-            <td>${task.educationLevel}</td>
-            <td>${task.educationYear}</td>
-            <td>${task.semester}</td>
-            <td>${task.skillLevel}</td>
-            <td>${task.bloomLevel}</td>
-            <td>${task.mainSkill}</td>
-            <td>${task.subSkill}</td>
-            <td>${task.heading}</td>
-            <td>${task.content}</td>
-            <td>${task.task}</td>
-            <td>${task.application}</td>
-        `;
-        tbody.appendChild(row);
-    });
-    
-    table.appendChild(thead);
-    table.appendChild(tbody);
-    
-    // Temporarily replace the main table
-    const mainTable = document.getElementById('tasksTable');
-    if (mainTable) {
-        mainTable.style.display = 'none';
-        mainTable.parentNode.insertBefore(table, mainTable);
-        
-        // Test download
-        setTimeout(() => {
-            downloadSelectedExcel();
-            
-            // Restore original table
-            setTimeout(() => {
-                table.remove();
-                mainTable.style.display = '';
-            }, 2000);
-        }, 500);
-    }
-}
 
 // Initialize row selection functionality
 function initializeRowSelection() {
