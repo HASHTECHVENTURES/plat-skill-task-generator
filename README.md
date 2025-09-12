@@ -213,11 +213,6 @@ The application supports 13+ comprehensive skill categories:
 3. Select main branch as source
 4. Access via `https://yourusername.github.io/plat-skill-task-generator`
 
-### **Vercel**
-1. Connect your GitHub repository to Vercel
-2. Deploy automatically on push
-3. Access via Vercel-provided URL
-
 ### **Local Development**
 ```bash
 # Using Python
@@ -310,7 +305,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🔗 Links
 
-- **Live Demo**: [plat-skill-task-generator.vercel.app](https://plat-skill-task-generator.vercel.app)
+- **Live Demo**: [plat-skill-task-generator.netlify.app](https://plat-skill-task-generator.netlify.app)
 - **GitHub Repository**: [github.com/HASHTECHVENTURES/plat-skill-task-generator](https://github.com/HASHTECHVENTURES/plat-skill-task-generator)
 - **Issues**: [github.com/HASHTECHVENTURES/plat-skill-task-generator/issues](https://github.com/HASHTECHVENTURES/plat-skill-task-generator/issues)
 - **Documentation**: [README.md](README.md)

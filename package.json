@@ -7,7 +7,7 @@
     "start": "python -m http.server 8000",
     "dev": "python -m http.server 8000",
     "build": "echo 'Static files ready for deployment'",
-    "deploy": "echo 'Deploy to Vercel or GitHub Pages'"
+    "deploy": "echo 'Deploy to GitHub Pages or Netlify'"
   },
   "keywords": [
     "ai",
@@ -30,7 +30,7 @@
     "type": "git",
     "url": "https://github.com/HASHTECHVENTURES/plat-skill-task-generator.git"
   },
-  "homepage": "https://plat-skill-task-generator.vercel.app",
+  "homepage": "https://plat-skill-task-generator.netlify.app",
   "bugs": {
     "url": "https://github.com/HASHTECHVENTURES/plat-skill-task-generator/issues"
   },
