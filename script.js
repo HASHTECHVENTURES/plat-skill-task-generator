@@ -519,15 +519,14 @@ function loadSavedPrompt() {
     const promptTextarea = document.getElementById('custom-prompt');
     
     if (promptTextarea) {
-        // Check if there's already a saved prompt
-        const savedPrompt = localStorage.getItem('customPrompt');
+        // Always clear the prompt textarea - no default content
+        promptTextarea.value = '';
+        promptTextarea.placeholder = 'Create your custom prompt here. Use placeholders like {{education-level}}, {{main-skill}}, {{skill-level}}, {{task-count}}';
         
+        // Load saved prompt if it exists
+        const savedPrompt = localStorage.getItem('customPrompt');
         if (savedPrompt) {
             promptTextarea.value = savedPrompt;
-        } else {
-            // Don't set any default prompt - let user create their own
-            promptTextarea.value = '';
-            promptTextarea.placeholder = 'Create your custom prompt here. Use placeholders like {{education-level}}, {{main-skill}}, {{skill-level}}, {{task-count}}';
         }
     }
 }
@@ -540,6 +539,11 @@ function resetToDefaultPrompt() {
         localStorage.removeItem('customPrompt');
         showSuccess('Prompt cleared! Create your custom prompt now.');
     }
+}
+
+// Clear any existing default prompt on page load
+function clearDefaultPrompt() {
+    localStorage.removeItem('customPrompt');
 }
 
 function saveCustomPrompt() {
@@ -1138,5 +1142,6 @@ function clearCacheAndShowVersion() {
 // Initialize app when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     clearCacheAndShowVersion();
+    clearDefaultPrompt(); // Clear any existing default prompt
     initApp();
 });
