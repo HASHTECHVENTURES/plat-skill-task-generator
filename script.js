@@ -525,27 +525,8 @@ function loadSavedPrompt() {
         if (savedPrompt) {
             promptTextarea.value = savedPrompt;
         } else {
-            // Provide a default prompt that ensures proper format
-            const defaultPrompt = `You are an expert in creating employability tasks for students. Generate {{task-count}} tasks for a {{education-level}} student in their {{education-year}} ({{semester}}) focusing on {{main-skill}} skills at {{skill-level}} level.
-
-IMPORTANT: Format your response EXACTLY as follows with pipe-separated values:
-
-Skill Level | Bloom Level | Main Skill | Sub Skill | Heading | Content | Task | Application
-
-Example format:
-Medium | Analyzing | Problem-Solving | Critical Thinking | Task Title | Task description and context | Specific task instructions | How to apply this skill
-
-Requirements:
-- Use the exact skill level: {{skill-level}}
-- Use appropriate Bloom's taxonomy levels (Remembering, Understanding, Applying, Analyzing, Evaluating, Creating)
-- Main Skill should be: {{main-skill}}
-- Create relevant sub-skills for each task
-- Make tasks practical and engaging
-- Ensure each task is bite-sized and achievable
-
-Generate {{task-count}} tasks now:`;
-            
-            promptTextarea.value = defaultPrompt;
+            // Don't set any default prompt - let user create their own
+            promptTextarea.value = '';
             promptTextarea.placeholder = 'Create your custom prompt here. Use placeholders like {{education-level}}, {{main-skill}}, {{skill-level}}, {{task-count}}';
         }
     }
@@ -554,10 +535,10 @@ Generate {{task-count}} tasks now:`;
 function resetToDefaultPrompt() {
     const promptTextarea = document.getElementById('custom-prompt');
     if (promptTextarea) {
-        // Load the default prompt
-        loadSavedPrompt();
+        // Clear the prompt and remove from storage
+        promptTextarea.value = '';
         localStorage.removeItem('customPrompt');
-        showSuccess('Reset to default prompt! The default prompt ensures proper formatting.');
+        showSuccess('Prompt cleared! Create your custom prompt now.');
     }
 }
 
@@ -1020,10 +1001,10 @@ function updateSelectAllState() {
     }
 }
 
-// Download Selected CSV
+// Download Selected Excel
 function downloadSelectedExcel() {
     try {
-        console.log('Starting CSV download...');
+        console.log('Starting Excel download...');
         
         const table = document.getElementById('tasksTable');
         if (!table) {
@@ -1048,7 +1029,10 @@ function downloadSelectedExcel() {
             return;
         }
 
-        // Create CSV content with header
+        // Create Excel workbook
+        const wb = XLSX.utils.book_new();
+        
+        // Get header row
         const headerRow = table.querySelector('thead tr');
         if (!headerRow) {
             console.error('No header row found');
@@ -1059,34 +1043,41 @@ function downloadSelectedExcel() {
         const headerCells = Array.from(headerRow.querySelectorAll('th'));
         console.log(`Found ${headerCells.length} header cells`);
         
-        const headerContent = headerCells.map(cell => {
-            const text = cell.textContent.trim().replace(/"/g, '""');
-            return `"${text}"`;
-        }).join(',');
+        // Create header array (skip the checkbox column)
+        const headers = headerCells.slice(1).map(cell => cell.textContent.trim());
         
-        console.log('Header content created:', headerContent);
-
-        // Add selected data rows
-        const dataContent = selectedRows.map((row, index) => {
+        // Create data array
+        const data = selectedRows.map((row, index) => {
             const cells = Array.from(row.querySelectorAll('td'));
             console.log(`Row ${index}: ${cells.length} cells`);
-            return cells.map(cell => {
-                const text = cell.textContent.trim().replace(/"/g, '""');
-                return `"${text}"`;
-            }).join(',');
-        }).join('\n');
+            // Skip the checkbox column (first cell)
+            return cells.slice(1).map(cell => cell.textContent.trim());
+        });
         
-        const csvContent = headerContent + '\n' + dataContent;
-        console.log('CSV content created, length:', csvContent.length);
+        // Combine headers and data
+        const worksheetData = [headers, ...data];
         
-        // Create and download CSV file
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        // Create worksheet
+        const ws = XLSX.utils.aoa_to_sheet(worksheetData);
+        
+        // Set column widths
+        const colWidths = headers.map(() => ({ wch: 20 }));
+        ws['!cols'] = colWidths;
+        
+        // Add worksheet to workbook
+        XLSX.utils.book_append_sheet(wb, ws, 'Employability Tasks');
+        
+        // Generate Excel file
+        const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+        
+        // Create blob and download
+        const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
         const link = document.createElement('a');
         const url = URL.createObjectURL(blob);
         
         // Set download attributes
         link.href = url;
-        link.download = `Employability_Tasks_Selected_${selectedRows.length}_${new Date().toISOString().split('T')[0]}.csv`;
+        link.download = `Employability_Tasks_Selected_${selectedRows.length}_${new Date().toISOString().split('T')[0]}.xlsx`;
         link.style.display = 'none';
         
         // Add to DOM, click, and remove
@@ -1101,12 +1092,12 @@ function downloadSelectedExcel() {
             console.log('Download cleanup completed');
         }, 100);
         
-        showSuccess(`Selected ${selectedRows.length} tasks downloaded successfully!`);
-        console.log('CSV download completed successfully');
+        showSuccess(`Selected ${selectedRows.length} tasks downloaded as Excel file successfully!`);
+        console.log('Excel download completed successfully');
         
     } catch (error) {
-        console.error('Error downloading selected CSV:', error);
-        displayError(`Failed to download CSV file: ${error.message}`);
+        console.error('Error downloading selected Excel:', error);
+        displayError(`Failed to download Excel file: ${error.message}`);
     }
 }
 
