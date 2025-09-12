@@ -905,6 +905,9 @@ function addEventListeners() {
     
     if (DOM.downloadSelectedExcelBtn) {
         DOM.downloadSelectedExcelBtn.addEventListener('click', downloadSelectedExcel);
+        console.log('Download Excel button event listener attached');
+    } else {
+        console.error('Download Excel button not found in DOM');
     }
     
 }
@@ -1010,6 +1013,13 @@ function downloadSelectedExcel() {
     try {
         console.log('Starting Excel download...');
         
+        // Check if XLSX library is available
+        if (typeof XLSX === 'undefined') {
+            console.error('XLSX library not loaded');
+            displayError('Excel library not loaded. Please refresh the page and try again.');
+            return;
+        }
+        
         const table = document.getElementById('tasksTable');
         if (!table) {
             console.error('No tasks table found');
@@ -1091,7 +1101,9 @@ function downloadSelectedExcel() {
         
         // Clean up
         setTimeout(() => {
-            document.body.removeChild(link);
+            if (document.body.contains(link)) {
+                document.body.removeChild(link);
+            }
             URL.revokeObjectURL(url);
             console.log('Download cleanup completed');
         }, 100);
@@ -1101,8 +1113,76 @@ function downloadSelectedExcel() {
         
     } catch (error) {
         console.error('Error downloading selected Excel:', error);
-        displayError(`Failed to download Excel file: ${error.message}`);
+        console.log('Attempting fallback CSV download...');
+        
+        // Fallback to CSV download
+        try {
+            downloadSelectedCSV();
+        } catch (csvError) {
+            console.error('CSV fallback also failed:', csvError);
+            displayError(`Failed to download file: ${error.message}. Please try refreshing the page.`);
+        }
     }
+}
+
+// Fallback CSV download function
+function downloadSelectedCSV() {
+    const table = document.getElementById('tasksTable');
+    if (!table) {
+        throw new Error('No tasks table found');
+    }
+
+    // Get selected rows
+    const selectedRows = Array.from(table.querySelectorAll('tbody tr')).filter(row => {
+        const checkbox = row.querySelector('.task-checkbox');
+        return checkbox && checkbox.checked;
+    });
+
+    if (selectedRows.length === 0) {
+        throw new Error('No rows selected');
+    }
+
+    // Get headers (skip checkbox column)
+    const headerRow = table.querySelector('thead tr');
+    const headerCells = Array.from(headerRow.querySelectorAll('th'));
+    const headers = headerCells.slice(1).map(cell => cell.textContent.trim());
+    
+    // Create CSV content
+    let csvContent = headers.join(',') + '\n';
+    
+    selectedRows.forEach(row => {
+        const cells = Array.from(row.querySelectorAll('td'));
+        const rowData = cells.slice(1).map(cell => {
+            // Escape commas and quotes in CSV
+            let content = cell.textContent.trim();
+            if (content.includes(',') || content.includes('"') || content.includes('\n')) {
+                content = '"' + content.replace(/"/g, '""') + '"';
+            }
+            return content;
+        });
+        csvContent += rowData.join(',') + '\n';
+    });
+    
+    // Create and download CSV file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.href = url;
+    link.download = `Employability_Tasks_Selected_${selectedRows.length}_${new Date().toISOString().split('T')[0]}.csv`;
+    link.style.display = 'none';
+    
+    document.body.appendChild(link);
+    link.click();
+    
+    setTimeout(() => {
+        if (document.body.contains(link)) {
+            document.body.removeChild(link);
+        }
+        URL.revokeObjectURL(url);
+    }, 100);
+    
+    showSuccess(`Selected ${selectedRows.length} tasks downloaded as CSV file successfully!`);
 }
 
 // Force clear cache and add version indicator
@@ -1139,9 +1219,26 @@ function clearCacheAndShowVersion() {
     }, 3000);
 }
 
+// Test XLSX library availability
+function testXLSXLibrary() {
+    if (typeof XLSX !== 'undefined') {
+        console.log('✅ XLSX library is loaded and available');
+        return true;
+    } else {
+        console.error('❌ XLSX library is not available');
+        return false;
+    }
+}
+
 // Initialize app when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     clearCacheAndShowVersion();
     clearDefaultPrompt(); // Clear any existing default prompt
+    
+    // Test XLSX library after a short delay to ensure it's loaded
+    setTimeout(() => {
+        testXLSXLibrary();
+    }, 1000);
+    
     initApp();
 });
