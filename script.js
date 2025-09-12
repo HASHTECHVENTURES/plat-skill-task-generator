@@ -261,30 +261,70 @@ function parseEmployabilityTasks(text, studentData) {
             if (columns.length >= 8) {
                 // New 8-column format
                 tasks.push({
-                    skillLevel: columns[0],
-                    bloomLevel: columns[1],
-                    mainSkill: columns[2],
-                    subSkill: columns[3],
-                    heading: columns[4],
-                    content: columns[5],
-                    task: columns[6],
-                    application: columns[7]
+                    educationLevel: studentData['education-level'] || 'N/A',
+                    educationYear: studentData['education-year'] || 'N/A',
+                    semester: studentData['semester'] || 'N/A',
+                    skillLevel: columns[0] || 'N/A',
+                    bloomLevel: columns[1] || 'N/A',
+                    mainSkill: columns[2] || studentData['main-skill'] || 'N/A',
+                    subSkill: columns[3] || 'N/A',
+                    heading: columns[4] || 'N/A',
+                    content: columns[5] || 'N/A',
+                    task: columns[6] || 'N/A',
+                    application: columns[7] || 'N/A'
                 });
             } else if (columns.length >= 6) {
                 // Old 6-column format - map to new format
                 console.warn('Detected old 6-column format, mapping to new format...');
                 tasks.push({
-                    skillLevel: columns[0],
-                    bloomLevel: columns[1],
-                    mainSkill: 'N/A', // Default value
-                    subSkill: 'N/A', // Default value
-                    heading: columns[2],
-                    content: columns[3],
-                    task: columns[4],
-                    application: columns[5]
+                    educationLevel: studentData['education-level'] || 'N/A',
+                    educationYear: studentData['education-year'] || 'N/A',
+                    semester: studentData['semester'] || 'N/A',
+                    skillLevel: columns[0] || 'N/A',
+                    bloomLevel: columns[1] || 'N/A',
+                    mainSkill: studentData['main-skill'] || 'N/A', // Use form data or default
+                    subSkill: 'N/A', // Default value for old format
+                    heading: columns[2] || 'N/A',
+                    content: columns[3] || 'N/A',
+                    task: columns[4] || 'N/A',
+                    application: columns[5] || 'N/A'
+                });
+            } else if (columns.length >= 4) {
+                // Minimal format - try to extract what we can
+                console.warn('Detected minimal format, attempting to extract data...');
+                tasks.push({
+                    educationLevel: studentData['education-level'] || 'N/A',
+                    educationYear: studentData['education-year'] || 'N/A',
+                    semester: studentData['semester'] || 'N/A',
+                    skillLevel: columns[0] || 'N/A',
+                    bloomLevel: columns[1] || 'N/A',
+                    mainSkill: studentData['main-skill'] || 'N/A',
+                    subSkill: 'N/A',
+                    heading: columns[2] || 'N/A',
+                    content: columns[3] || 'N/A',
+                    task: columns[4] || 'N/A',
+                    application: columns[5] || 'N/A'
                 });
             }
         }
+    }
+    
+    // If no tasks were parsed, create a fallback task with form data
+    if (tasks.length === 0) {
+        console.warn('No tasks could be parsed from AI response, creating fallback task...');
+        tasks.push({
+            educationLevel: studentData['education-level'] || 'N/A',
+            educationYear: studentData['education-year'] || 'N/A',
+            semester: studentData['semester'] || 'N/A',
+            skillLevel: studentData['skill-level'] || 'Medium',
+            bloomLevel: 'Analyzing',
+            mainSkill: studentData['main-skill'] || 'N/A',
+            subSkill: 'N/A',
+            heading: 'Generated Task',
+            content: 'Task content could not be parsed from AI response.',
+            task: 'Please try generating tasks again with a different prompt.',
+            application: 'This is a fallback task created when parsing failed.'
+        });
     }
     
     return {
@@ -337,6 +377,9 @@ function populateTasksTable(tasks) {
             <td>
                 <input type="checkbox" class="task-checkbox" data-task-index="${index}">
             </td>
+            <td><span class="education-level">${task.educationLevel || 'N/A'}</span></td>
+            <td><span class="education-year">${task.educationYear || 'N/A'}</span></td>
+            <td><span class="semester">${task.semester || 'N/A'}</span></td>
             <td><span class="skill-level ${task.skillLevel.toLowerCase()}">${task.skillLevel}</span></td>
             <td><span class="bloom-level">${task.bloomLevel || 'N/A'}</span></td>
             <td><span class="main-skill">${task.mainSkill || 'N/A'}</span></td>
@@ -364,8 +407,13 @@ async function translateTasks(tasks, targetLanguage) {
         
         for (const task of tasks) {
             const translatedTask = {
+                educationLevel: task.educationLevel,
+                educationYear: task.educationYear,
+                semester: task.semester,
                 skillLevel: task.skillLevel,
                 bloomLevel: task.bloomLevel,
+                mainSkill: task.mainSkill,
+                subSkill: task.subSkill,
                 heading: await translateText(task.heading, targetLanguage),
                 content: await translateText(task.content, targetLanguage),
                 task: await translateText(task.task, targetLanguage),
@@ -912,6 +960,9 @@ function testCSVDownload() {
 function createTestDataForDownload() {
     const testTasks = [
         {
+            educationLevel: 'bachelor',
+            educationYear: '2nd-year',
+            semester: '3rd-semester',
             skillLevel: 'Low',
             bloomLevel: 'Remembering',
             mainSkill: 'Communication',
@@ -922,6 +973,9 @@ function createTestDataForDownload() {
             application: 'Apply this in real-world scenarios'
         },
         {
+            educationLevel: 'bachelor',
+            educationYear: '2nd-year',
+            semester: '3rd-semester',
             skillLevel: 'Medium',
             bloomLevel: 'Understanding',
             mainSkill: 'Problem-Solving',
@@ -942,6 +996,9 @@ function createTestDataForDownload() {
     thead.innerHTML = `
         <tr>
             <th>Select</th>
+            <th>Education Level</th>
+            <th>Education Year</th>
+            <th>Semester</th>
             <th>Skill Level</th>
             <th>Bloom Level</th>
             <th>Main Skill</th>
@@ -958,6 +1015,9 @@ function createTestDataForDownload() {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td><input type="checkbox" class="task-checkbox" checked></td>
+            <td>${task.educationLevel}</td>
+            <td>${task.educationYear}</td>
+            <td>${task.semester}</td>
             <td>${task.skillLevel}</td>
             <td>${task.bloomLevel}</td>
             <td>${task.mainSkill}</td>
