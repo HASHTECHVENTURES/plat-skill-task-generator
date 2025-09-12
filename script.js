@@ -449,8 +449,15 @@ function populateTasksTable(tasks) {
         DOM.tasksTableBody.appendChild(row);
     });
     
+    console.log(`Table populated with ${tasks.length} tasks`);
+    
     // Initialize row selection functionality
     initializeRowSelection();
+    
+    // Force update selection counter after table is populated
+    setTimeout(() => {
+        updateSelectionCounter();
+    }, 100);
 }
 
 // Translation functions
@@ -981,11 +988,16 @@ function updateSelectionCounter() {
     const selectedCount = document.querySelectorAll('.task-checkbox:checked').length;
     const totalCount = document.querySelectorAll('.task-checkbox').length;
     
+    console.log(`Selection update: ${selectedCount} selected out of ${totalCount} total tasks`);
+    
     DOM.selectionCounter.textContent = `${selectedCount} selected`;
     
     // Enable/disable download selected button
     if (DOM.downloadSelectedExcelBtn) {
         DOM.downloadSelectedExcelBtn.disabled = selectedCount === 0;
+        console.log(`Download button disabled: ${DOM.downloadSelectedExcelBtn.disabled}`);
+    } else {
+        console.error('Download button not found in DOM');
     }
 }
 
@@ -1229,6 +1241,17 @@ function testXLSXLibrary() {
         return false;
     }
 }
+
+// Test function to enable download button (for debugging)
+function enableDownloadButton() {
+    if (DOM.downloadSelectedExcelBtn) {
+        DOM.downloadSelectedExcelBtn.disabled = false;
+        console.log('Download button manually enabled for testing');
+    }
+}
+
+// Make test function available globally for debugging
+window.enableDownloadButton = enableDownloadButton;
 
 // Initialize app when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
