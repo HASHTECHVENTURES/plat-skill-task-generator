@@ -251,12 +251,16 @@ function createEmployabilityPrompt(data) {
 
 // Parse employability tasks from AI response
 function parseEmployabilityTasks(text, studentData) {
+    console.log('Parsing AI response:', text.substring(0, 500) + '...');
+    
     const tasks = [];
     const lines = text.split('\n').filter(line => line.trim());
     
+    // Try to parse different formats
     for (const line of lines) {
         if (line.includes('|') && !line.includes('Skill Level') && !line.includes('---')) {
             const columns = line.split('|').map(col => col.trim()).filter(col => col);
+            console.log('Found pipe-separated line with', columns.length, 'columns:', columns);
             
             if (columns.length >= 8) {
                 // New 8-column format
@@ -309,7 +313,25 @@ function parseEmployabilityTasks(text, studentData) {
         }
     }
     
-    // If no tasks were parsed, create a fallback task with form data
+    // If no pipe-separated format found, try to extract task information from the text
+    if (tasks.length === 0) {
+        console.warn('No pipe-separated format found, attempting to extract tasks from text...');
+        
+        // Try to find task patterns in the text
+        const taskPatterns = [
+            /Task\s*\d*[:\-]?\s*(.+?)(?=Task\s*\d*[:\-]?\s*|$)/gis,
+            /Heading[:\-]?\s*(.+?)(?=Content[:\-]?\s*|$)/gis,
+            /Content[:\-]?\s*(.+?)(?=Task[:\-]?\s*|$)/gis
+        ];
+        
+        // Extract basic task information from the text
+        const extractedTasks = extractTasksFromText(text, studentData);
+        if (extractedTasks.length > 0) {
+            tasks.push(...extractedTasks);
+        }
+    }
+    
+    // If still no tasks, create a fallback task with form data
     if (tasks.length === 0) {
         console.warn('No tasks could be parsed from AI response, creating fallback task...');
         tasks.push({
@@ -327,10 +349,65 @@ function parseEmployabilityTasks(text, studentData) {
         });
     }
     
+    console.log('Parsed tasks:', tasks.length, 'tasks found');
     return {
         studentData,
         tasks: tasks
     };
+}
+
+// Helper function to extract tasks from unstructured text
+function extractTasksFromText(text, studentData) {
+    const tasks = [];
+    
+    // Split text into potential task sections
+    const sections = text.split(/\n\s*\n/).filter(section => section.trim().length > 50);
+    
+    sections.forEach((section, index) => {
+        if (section.trim().length > 100) { // Only process substantial sections
+            const lines = section.split('\n').filter(line => line.trim());
+            
+            // Try to extract heading, content, task, and application
+            let heading = `Task ${index + 1}`;
+            let content = '';
+            let task = '';
+            let application = '';
+            
+            // Look for common patterns
+            for (const line of lines) {
+                if (line.match(/^[A-Z][^.!?]*[.!?]$/) && line.length > 20) {
+                    if (!heading || heading === `Task ${index + 1}`) {
+                        heading = line.trim();
+                    }
+                } else if (line.includes('Task:') || line.includes('Activity:')) {
+                    task = line.replace(/^(Task|Activity):\s*/, '').trim();
+                } else if (line.includes('Application:') || line.includes('Use:')) {
+                    application = line.replace(/^(Application|Use):\s*/, '').trim();
+                } else if (line.length > 50) {
+                    content += line.trim() + ' ';
+                }
+            }
+            
+            // If we found substantial content, create a task
+            if (content.trim().length > 50 || task.trim().length > 20) {
+                tasks.push({
+                    educationLevel: studentData['education-level'] || 'N/A',
+                    educationYear: studentData['education-year'] || 'N/A',
+                    semester: studentData['semester'] || 'N/A',
+                    skillLevel: studentData['skill-level'] || 'Medium',
+                    bloomLevel: 'Analyzing',
+                    mainSkill: studentData['main-skill'] || 'N/A',
+                    subSkill: 'N/A',
+                    heading: heading,
+                    content: content.trim() || 'Task content extracted from AI response.',
+                    task: task || 'Complete the task as described.',
+                    application: application || 'Apply this skill in real-world scenarios.'
+                });
+            }
+        }
+    });
+    
+    return tasks;
 }
 
 // Display results in table format
@@ -517,20 +594,45 @@ function loadSavedPrompt() {
     const promptTextarea = document.getElementById('custom-prompt');
     
     if (promptTextarea) {
-        // Clear any existing saved prompt and start fresh
-        promptTextarea.value = '';
-        localStorage.removeItem('customPrompt');
-        promptTextarea.placeholder = 'Create your custom prompt here. Use placeholders like {{education-level}}, {{main-skill}}, {{skill-level}}, {{task-count}}';
+        // Check if there's already a saved prompt
+        const savedPrompt = localStorage.getItem('customPrompt');
+        
+        if (savedPrompt) {
+            promptTextarea.value = savedPrompt;
+        } else {
+            // Provide a default prompt that ensures proper format
+            const defaultPrompt = `You are an expert in creating employability tasks for students. Generate {{task-count}} tasks for a {{education-level}} student in their {{education-year}} ({{semester}}) focusing on {{main-skill}} skills at {{skill-level}} level.
+
+IMPORTANT: Format your response EXACTLY as follows with pipe-separated values:
+
+Skill Level | Bloom Level | Main Skill | Sub Skill | Heading | Content | Task | Application
+
+Example format:
+Medium | Analyzing | Problem-Solving | Critical Thinking | Task Title | Task description and context | Specific task instructions | How to apply this skill
+
+Requirements:
+- Use the exact skill level: {{skill-level}}
+- Use appropriate Bloom's taxonomy levels (Remembering, Understanding, Applying, Analyzing, Evaluating, Creating)
+- Main Skill should be: {{main-skill}}
+- Create relevant sub-skills for each task
+- Make tasks practical and engaging
+- Ensure each task is bite-sized and achievable
+
+Generate {{task-count}} tasks now:`;
+            
+            promptTextarea.value = defaultPrompt;
+            promptTextarea.placeholder = 'Create your custom prompt here. Use placeholders like {{education-level}}, {{main-skill}}, {{skill-level}}, {{task-count}}';
+        }
     }
 }
 
 function resetToDefaultPrompt() {
     const promptTextarea = document.getElementById('custom-prompt');
     if (promptTextarea) {
-        promptTextarea.value = '';
-        promptTextarea.placeholder = 'Create your custom prompt here. Use placeholders like {{education-level}}, {{main-skill}}, {{skill-level}}, {{task-count}}';
+        // Load the default prompt
+        loadSavedPrompt();
         localStorage.removeItem('customPrompt');
-        showSuccess('Custom prompt cleared! Please create your own custom prompt.');
+        showSuccess('Reset to default prompt! The default prompt ensures proper formatting.');
     }
 }
 
