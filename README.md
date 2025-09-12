@@ -306,6 +306,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 *Empowering career development through AI-driven task generation with 100% accuracy*
 
+<!-- Updated: Added Education Level, Year, and Semester columns to CSV export -->
+
 ## 🔗 Links
 
 - **Live Demo**: [plat-skill-task-generator.vercel.app](https://plat-skill-task-generator.vercel.app)
