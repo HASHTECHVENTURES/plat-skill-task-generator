@@ -1334,5 +1334,42 @@ function downloadSelectedExcel() {
     }
 }
 
+// Force clear cache and add version indicator
+function clearCacheAndShowVersion() {
+    // Clear localStorage cache
+    if (localStorage.getItem('lastVersion') !== '20250112') {
+        localStorage.clear();
+        localStorage.setItem('lastVersion', '20250112');
+        console.log('Cache cleared - new version loaded: 20250112');
+    }
+    
+    // Add version indicator to page
+    const versionDiv = document.createElement('div');
+    versionDiv.style.cssText = `
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background: #4CAF50;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 12px;
+        z-index: 9999;
+        font-family: Arial, sans-serif;
+    `;
+    versionDiv.textContent = 'v2.1 - 20250112';
+    document.body.appendChild(versionDiv);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        if (document.body.contains(versionDiv)) {
+            document.body.removeChild(versionDiv);
+        }
+    }, 3000);
+}
+
 // Initialize app when DOM is loaded
-document.addEventListener('DOMContentLoaded', initApp);
+document.addEventListener('DOMContentLoaded', function() {
+    clearCacheAndShowVersion();
+    initApp();
+});
