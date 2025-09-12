@@ -252,6 +252,7 @@ function createEmployabilityPrompt(data) {
 // Parse employability tasks from AI response
 function parseEmployabilityTasks(text, studentData) {
     console.log('Parsing AI response:', text.substring(0, 500) + '...');
+    console.log('Student data received:', studentData);
     
     const tasks = [];
     const lines = text.split('\n').filter(line => line.trim());
@@ -446,9 +447,11 @@ async function displayResults(data) {
 
 // Populate tasks table
 function populateTasksTable(tasks) {
+    console.log('Populating table with tasks:', tasks);
     DOM.tasksTableBody.innerHTML = '';
     
     tasks.forEach((task, index) => {
+        console.log(`Task ${index}:`, task);
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>
